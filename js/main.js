@@ -173,3 +173,16 @@ function alertCustom(msg) {
     document.body.appendChild(div);
     setTimeout(() => div.remove(), 3000);
 }
+
+function copyPortfolio() {
+    const text = document.getElementById('reportResume').innerText;
+    navigator.clipboard.writeText(text).then(() => alertCopyCustom("Reporte copiado."));
+}
+
+function alertCopyCustom(msg) {
+    const div = document.createElement('div');
+    div.className = "fixed bottom-4 right-4 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce";
+    div.innerText = msg;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 3000);
+}
