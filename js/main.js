@@ -186,3 +186,11 @@ function alertCopyCustom(msg) {
     document.body.appendChild(div);
     setTimeout(() => div.remove(), 3000);
 }
+
+// Función para establecer la hora actual
+function setCurrentTime(inputId) {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById(inputId).value = `${hours}:${minutes}`;
+}
