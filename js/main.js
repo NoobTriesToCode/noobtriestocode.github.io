@@ -1,82 +1,22 @@
-//Cookies
-function setCookie(name, value, days = 365) {
-    const date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    const expires = "; expires=" + date.toUTCString();
-    document.cookie = name + "=" + (encodeURIComponent(JSON.stringify(value)) || "") + expires + "; path=/; SameSite=Strict";
-}
-
-function getCookie(name) {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) == 0) {
-            try {
-                return JSON.parse(decodeURIComponent(c.substring(nameEQ.length, c.length)));
-            } catch (e) {
-                return null;
-            }
-        }
-    }
-    return null;
-}
-
-function eraseCookie(name) {
-    document.cookie = name + '=; Max-Age=-99999999; path=/;';
-}
-
 // Cargar datos de localStorage al iniciar
-let entries = [];
-let storedName = "";
-
-
-if (entries.length === 0) {
-    console.log("No se encontraron entradas de tiempo en localStorage, comprobando si hay cookies...");
-    let entries = JSON.parse(getCookie('work_time_entries') || '[]');
-    console.log("Entradas cargadas desde cookies:", entries.length);
-} else {
-    let entriesCookies = JSON.parse(getCookie('work_time_entries_cookie') || '[]');
-    console.log("Entradas cargadas desde cookies:", entriesCookies.length);
-}
+let entries = JSON.parse(localStorage.getItem('work_time_entries')) || [];
+let storedName = localStorage.getItem('work_user_name') || "";
 
 window.onload = () => {
-    // Intentar cargar de LocalStorage
-    entries = JSON.parse(localStorage.getItem('work_time_entries'));
-    storedName = localStorage.getItem('work_user_name');
-
-    // Si no hay en LocalStorage, intentar de Cookies
-    if (!entries || entries.length === 0) {
-        const cookieEntries = getCookie('work_time_entries_cookie');
-        if (cookieEntries) entries = JSON.parse(cookieEntries);
-    }
-
-    if (!storedName) {
-        const cookieName = getCookie('work_user_name_cookie');
-        if (cookieName) storedName = cookieName;
-    }
-
-    // Normalizar a array vacío si sigue siendo null
-    if (!entries) entries = [];
-
     if (storedName) {
         document.getElementById('userName').value = storedName;
-        updateDisplayName(false); // false para no volver a guardar en loop
+        updateDisplayName();
     }
     renderEntries();
 };
 
-function updateDisplayName(save = true) {
+function updateDisplayName() {
     const nameInput = document.getElementById('userName').value;
     const display = document.getElementById('displayName');
     display.innerText = nameInput.trim() === "" ? "Usuario" : nameInput;
+    localStorage.setItem('work_user_name', nameInput);
 
-    if (save) {
-        localStorage.setItem('work_user_name', nameInput);
-        setCookie('work_user_name_cookie', nameInput, 365);
-    }
-
+    // Actualizar también en el informe si existe
     if (entries.length > 0) {
         document.getElementById('reportName').innerText = nameInput.trim() === "" ? "Usuario" : nameInput;
     }
@@ -153,7 +93,6 @@ function formatMinutes(mins) {
 
 function saveData() {
     localStorage.setItem('work_time_entries', JSON.stringify(entries));
-    setCookie('work_time_entries_cookie', entries);
 }
 
 function deleteEntry(id) {
@@ -165,13 +104,8 @@ function deleteEntry(id) {
 function clearAll() {
     if (confirm("¿Estás seguro de que quieres borrar todo el historial?")) {
         entries = [];
-        localStorage.removeItem('work_time_entries');
-        localStorage.removeItem('work_user_name');
-        eraseCookie('work_time_entries_cookie');
-        eraseCookie('work_user_name_cookie');
+        saveData();
         renderEntries();
-        document.getElementById('userName').value = '';
-        updateDisplayName(false);
     }
 }
 
