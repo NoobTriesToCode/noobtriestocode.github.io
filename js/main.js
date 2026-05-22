@@ -194,3 +194,83 @@ function setCurrentTime(inputId) {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     document.getElementById(inputId).value = `${hours}:${minutes}`;
 }
+
+// Exportar e importar informacion
+
+function exportData() {
+    if (entries.length === 0) {
+        alertCustom("No hay registros para exportar.", "error");
+        return;
+    }
+    const userName = document.getElementById('userName').value.trim() || "Usuario";
+    const dataToExport = {
+        work_user_name: userName,
+        work_time_entries: entries
+    };
+
+    try {
+        const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const cleanName = userName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        a.download = `copia_horas_${cleanName}_${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        alertCustom("Archivo exportado correctamente.", "success");
+    } catch (e) {
+        alertCustom("Error al exportar datos.", "error");
+    }
+}
+
+function importData() {
+    document.getElementById('importFile').click();
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const importFileInput = document.getElementById('importFile');
+    if (importFileInput) {
+        importFileInput.addEventListener('change', handleImportFile);
+    }
+});
+
+function handleImportFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const fileInput = event.target;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        try {
+            const imported = JSON.parse(e.target.result);
+            let importedEntries = null;
+            let importedName = null;
+
+            if (imported && Array.isArray(imported.work_time_entries)) {
+                importedEntries = imported.work_time_entries;
+                importedName = imported.work_user_name;
+            } else if (Array.isArray(imported)) {
+                importedEntries = imported;
+            }
+
+            if (importedEntries) {
+                entries = importedEntries;
+                if (importedName) {
+                    document.getElementById('userName').value = importedName;
+                    updateDisplayName(true);
+                }
+                saveData();
+                renderEntries();
+                alertCustom("Datos importados correctamente.", "success");
+            } else {
+                alertCustom("Formato de archivo no válido.", "error");
+            }
+        } catch (err) {
+            alertCustom("Error al leer el archivo JSON.", "error");
+        }
+        fileInput.value = ''; // Resetear control
+    };
+    reader.readAsText(file);
+}

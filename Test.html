@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Horas y Primas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+
+<body class="p-4 md:p-8">
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800">Calculadora de Jornada</h1>
+            <p class="text-gray-600">Registra tus horas y calcula automáticamente las primas nocturnas</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Formulario de Entrada -->
+            <div class="md:col-span-1">
+                <div class="card p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Nuevo Registro</h2>
+                    <div class="space-y-4">
+                        <!-- Campo de Nombre -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nombre del Usuario</label>
+                            <input type="text" id="userName" placeholder="Escribe tu nombre..."
+                                oninput="updateDisplayName()"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                        </div>
+
+                        <!-- Hora de Entrada con botón de "Ahora" -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Hora de Entrada</label>
+                            <div class="flex gap-2 mt-1">
+                                <input type="time" id="startTime"
+                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                                <button onclick="setCurrentTime('startTime')" title="Usar hora actual"
+                                    class="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md px-3 py-2 transition-colors">
+                                    🕒
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Hora de Salida con botón de "Ahora" -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Hora de Salida</label>
+                            <div class="flex gap-2 mt-1">
+                                <input type="time" id="endTime"
+                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                                <button onclick="setCurrentTime('endTime')" title="Usar hora actual"
+                                    class="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md px-3 py-2 transition-colors">
+                                    🕒
+                                </button>
+                            </div>
+                        </div>
+
+                        <button onclick="addTimeEntry()"
+                            class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                            Añadir Registro
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Resumen Total Lateral -->
+                <div class="card p-6 mt-6 bg-blue-50 border-l-4 border-blue-500">
+                    <div class="mb-4">
+                        <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Empleado</span>
+                        <h2 id="displayName" class="text-xl font-bold text-gray-800 truncate">Usuario</h2>
+                    </div>
+                    <h2 class="text-lg font-bold text-gray-800 mb-2 border-t pt-2 border-blue-100">Totales Acumulados
+                    </h2>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total Horas:</span>
+                            <span id="totalHours" class="font-mono font-bold text-blue-700">0h 0m</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Horas Primas:</span>
+                            <span id="totalNightHours" class="font-mono font-bold text-indigo-700">0h 0m</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-blue-100 flex flex-col gap-2">
+                        <span class="text-xs font-bold text-gray-500 uppercase tracking-wider block">Copia de Seguridad
+                            Local</span>
+                        <div class="flex gap-2">
+                            <button onclick="exportData()"
+                                class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold py-2 px-3 rounded-lg border border-gray-300 transition duration-200 text-center flex items-center justify-center gap-1">
+                                📥 Exportar
+                            </button>
+                            <button onclick="importData()"
+                                class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold py-2 px-3 rounded-lg border border-gray-300 transition duration-200 text-center flex items-center justify-center gap-1">
+                                📤 Importar
+                            </button>
+                            <input type="file" id="importFile" accept=".json" class="hidden"
+                                onchange="importData(event)">
+                        </div>
+                    </div>
+
+                    <button onclick="openConfirmModal()" class="mt-4 text-xs text-red-500 hover:underline">Borrar todo
+                        el historial</button>
+                </div>
+            </div>
+
+            <!-- Listado e Informe -->
+            <div class="md:col-span-2 space-y-6">
+                <!-- Card de Informe de Registro Reciente -->
+                <div id="recentReportCard" class="card p-6 border-t-4 border-green-500 hidden">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                        <span class="mr-2">📝</span> Informe de Registro Reciente
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div class="bg-gray-50 p-3 rounded border">
+                            <p class="text-gray-500 font-medium">Empleado:</p>
+                            <p id="reportName" class="text-lg font-bold text-gray-800">-</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded border">
+                            <p class="text-gray-500 font-medium">Fecha del registro:</p>
+                            <p id="reportDate" class="text-lg font-bold text-gray-800">-</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded border">
+                            <p class="text-gray-500 font-medium">Hora de Entrada:</p>
+                            <p id="reportStart" class="text-lg font-bold text-gray-800">-</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded border">
+                            <p class="text-gray-500 font-medium">Hora de Salida:</p>
+                            <p id="reportEnd" class="text-lg font-bold text-gray-800">-</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded border">
+                            <p class="text-gray-500 font-medium">Hora total (este registro):</p>
+                            <p id="reportSingleTotal" class="text-lg font-bold text-green-600">-</p>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded border border-blue-100">
+                            <p class="text-blue-600 font-medium">Hora total acumulada:</p>
+                            <p id="reportAccTotal" class="text-lg font-bold text-blue-700">-</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 bg-indigo-50 p-3 rounded border border-indigo-100">
+                        <p class="text-indigo-600 font-medium text-sm">Hora total acumulada de 18:00 a 6:00:</p>
+                        <p id="reportAccNight" class="text-xl font-bold text-indigo-700">-</p>
+                    </div>
+                </div>
+
+                <!-- Historial de Registros -->
+                <div class="card p-6 overflow-hidden">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Historial de Registros</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entrada
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Salida
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duración
+                                    </th>
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase text-indigo-600">
+                                        Primas</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acción
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Dinámico -->
+                            </tbody>
+                        </table>
+                        <div id="emptyState" class="text-center py-8 text-gray-400 hidden">
+                            No hay registros guardados.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación personalizado (sin usar confirm() nativo) -->
+    <div id="confirmModal"
+        class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-200">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 animate-scale">
+            <h3 class="text-lg font-bold text-gray-900 mb-2">¿Estás seguro?</h3>
+            <p class="text-gray-500 text-sm mb-6">Esta acción borrará de forma permanente todo el historial guardado en
+                tu navegador y cookies.</p>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeConfirmModal()"
+                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition">Cancelar</button>
+                <button onclick="executeClearAll()"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition">Borrar
+                    todo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cargar datos de localStorage/Cookies al iniciar
+        let entries = [];
+        let storedName = "";
+
+        // Funciones auxiliares para Cookies de respaldo
+        function setCookie(name, value, days = 365) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "; expires=" + date.toUTCString();
+            document.cookie = name + "=" + encodeURIComponent(JSON.stringify(value)) + expires + "; path=/; SameSite=Strict";
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) {
+                    try {
+                        return JSON.parse(decodeURIComponent(c.substring(nameEQ.length, c.length)));
+                    } catch (e) {
+                        return null;
+                    }
+                }
+            }
+            return null;
+        }
+
+        function eraseCookie(name) {
+            document.cookie = name + '=; Max-Age=-99999999; path=/;';
+        }
+
+        window.onload = () => {
+            // Intentar cargar desde localStorage
+            try {
+                entries = JSON.parse(localStorage.getItem('work_time_entries')) || [];
+                storedName = localStorage.getItem('work_user_name') || "";
+            } catch (e) {
+                console.warn("LocalStorage no disponible, cargando desde Cookies...");
+            }
+
+            // Fallback a cookies si localstorage falló o estaba vacío
+            if (entries.length === 0) {
+                entries = getCookie('work_time_entries_cookie') || [];
+            }
+            if (!storedName) {
+                storedName = getCookie('work_user_name_cookie') || "";
+            }
+
+            if (storedName) {
+                document.getElementById('userName').value = storedName;
+                updateDisplayName(false);
+            }
+            renderEntries();
+        };
+
+        function updateDisplayName(shouldSave = true) {
+            const nameInput = document.getElementById('userName').value;
+            const display = document.getElementById('displayName');
+            display.innerText = nameInput.trim() === "" ? "Usuario" : nameInput;
+
+            if (shouldSave) {
+                try {
+                    localStorage.setItem('work_user_name', nameInput);
+                } catch (e) { }
+                setCookie('work_user_name_cookie', nameInput);
+            }
+
+            // Actualizar también en el informe de registro reciente si existe
+            if (entries.length > 0) {
+                document.getElementById('reportName').innerText = nameInput.trim() === "" ? "Usuario" : nameInput;
+            }
+        }
+
+        // Función para establecer la hora actual
+        function setCurrentTime(inputId) {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById(inputId).value = `${hours}:${minutes}`;
+        }
+
+        function addTimeEntry() {
+            const startVal = document.getElementById('startTime').value;
+            const endVal = document.getElementById('endTime').value;
+
+            if (!startVal || !endVal) {
+                alertCustom("Por favor, rellena ambas horas.");
+                return;
+            }
+
+            const calculation = calculateDuration(startVal, endVal);
+
+            // Obtener fecha actual en formato local
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            const newEntry = {
+                id: Date.now(),
+                date: dateStr,
+                start: startVal,
+                end: endVal,
+                totalMinutes: calculation.totalMinutes,
+                nightMinutes: calculation.nightMinutes
+            };
+
+            entries.push(newEntry);
+            saveData();
+            renderEntries();
+
+            // Limpiar inputs de tiempo solamente
+            document.getElementById('startTime').value = '';
+            document.getElementById('endTime').value = '';
+        }
+
+        function calculateDuration(startStr, endStr) {
+            const startArr = startStr.split(':').map(Number);
+            const endArr = endStr.split(':').map(Number);
+
+            let startMin = startArr[0] * 60 + startArr[1];
+            let endMin = endArr[0] * 60 + endArr[1];
+
+            // Si la hora de fin es menor que la de inicio, asumimos que pasó la medianoche
+            if (endMin < startMin) {
+                endMin += 24 * 60;
+            }
+
+            const totalMinutes = endMin - startMin;
+
+            // Cálculo de horas para primas (18:00 a 06:00)
+            let nightMinutes = 0;
+            for (let m = startMin; m < endMin; m++) {
+                let currentMinInDay = m % (24 * 60);
+                if (currentMinInDay < 360 || currentMinInDay >= 1080) {
+                    nightMinutes++;
+                }
+            }
+
+            return { totalMinutes, nightMinutes };
+        }
+
+        function formatMinutes(mins) {
+            const h = Math.floor(mins / 60);
+            const m = mins % 60;
+            return `${h}h ${m}m`;
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem('work_time_entries', JSON.stringify(entries));
+            } catch (e) { }
+            setCookie('work_time_entries_cookie', entries);
+        }
+
+        function exportData() {
+            if (entries.length === 0) {
+                alertCustom("No hay registros para exportar.", "error");
+                return;
+            }
+            const userName = document.getElementById('userName').value.trim() || "Usuario";
+            const dataToExport = {
+                work_user_name: userName,
+                work_time_entries: entries
+            };
+
+            try {
+                const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const cleanName = userName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                a.download = `copia_horas_${cleanName}_${new Date().toISOString().slice(0, 10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                alertCustom("Archivo exportado correctamente.", "success");
+            } catch (e) {
+                alertCustom("Error al exportar datos.", "error");
+            }
+        }
+
+        function importData() {
+            document.getElementById('importFile').click();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    let importedEntries = null;
+                    let importedName = null;
+
+                    if (imported && Array.isArray(imported.work_time_entries)) {
+                        importedEntries = imported.work_time_entries;
+                        importedName = imported.work_user_name;
+                    } else if (Array.isArray(imported)) {
+                        importedEntries = imported;
+                    }
+
+                    if (importedEntries) {
+                        entries = importedEntries;
+                        if (importedName) {
+                            document.getElementById('userName').value = importedName;
+                            updateDisplayName(true);
+                        }
+                        saveData();
+                        renderEntries();
+                        alertCustom("Datos importados correctamente.", "success");
+                    } else {
+                        alertCustom("Formato de archivo no válido.", "error");
+                    }
+                } catch (err) {
+                    alertCustom("Error al leer el archivo JSON.", "error");
+                }
+                event.target.value = ''; // Resetear control
+            };
+            reader.readAsText(file);
+        }
+
+        function deleteEntry(id) {
+            entries = entries.filter(e => e.id !== id);
+            saveData();
+            renderEntries();
+        }
+
+        // Funciones del Modal de Confirmación
+        function openConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.add('hidden');
+        }
+
+        function executeClearAll() {
+            entries = [];
+            try {
+                localStorage.removeItem('work_time_entries');
+                localStorage.removeItem('work_user_name');
+            } catch (e) { }
+            eraseCookie('work_time_entries_cookie');
+            eraseCookie('work_user_name_cookie');
+
+            document.getElementById('userName').value = '';
+            updateDisplayName(false);
+            renderEntries();
+            closeConfirmModal();
+            alertCustom("Historial borrado con éxito.", "success");
+        }
+
+        function renderEntries() {
+            const tbody = document.getElementById('historyBody');
+            const emptyState = document.getElementById('emptyState');
+            const recentCard = document.getElementById('recentReportCard');
+
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            let totalAcc = 0;
+            let nightAcc = 0;
+
+            if (entries.length === 0) {
+                if (emptyState) emptyState.classList.remove('hidden');
+                if (recentCard) recentCard.classList.add('hidden');
+            } else {
+                if (emptyState) emptyState.classList.add('hidden');
+                if (recentCard) recentCard.classList.remove('hidden');
+
+                // Calculamos los totales sobre el array original
+                entries.forEach(entry => {
+                    totalAcc += entry.totalMinutes;
+                    nightAcc += entry.nightMinutes;
+                });
+
+                // Registro más reciente
+                const mostRecent = entries[entries.length - 1];
+                const currentName = document.getElementById('userName').value.trim() || "Usuario";
+
+                // Rellenar card de informe de manera segura verificando la existencia de los IDs
+                const repName = document.getElementById('reportName');
+                const repDate = document.getElementById('reportDate');
+                const repStart = document.getElementById('reportStart');
+                const repEnd = document.getElementById('reportEnd');
+                const repSingle = document.getElementById('reportSingleTotal');
+                const repAcc = document.getElementById('reportAccTotal');
+                const repAccNight = document.getElementById('reportAccNight');
+
+                if (repName) repName.innerText = currentName;
+                if (repDate) repDate.innerText = mostRecent.date || '-';
+                if (repStart) repStart.innerText = mostRecent.start || '-';
+                if (repEnd) repEnd.innerText = mostRecent.end || '-';
+                if (repSingle) repSingle.innerText = formatMinutes(mostRecent.totalMinutes);
+                if (repAcc) repAcc.innerText = formatMinutes(totalAcc);
+                if (repAccNight) repAccNight.innerText = formatMinutes(nightAcc);
+
+                // Ordenamos una copia del array para mostrar el más reciente primero en la tabla
+                const reversedEntries = [...entries].reverse();
+
+                reversedEntries.forEach(entry => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${entry.date || '-'}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${entry.start}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${entry.end}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${formatMinutes(entry.totalMinutes)}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-indigo-600">${formatMinutes(entry.nightMinutes)}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                            <button onclick="deleteEntry(${entry.id})" class="text-red-600 hover:text-red-900">Eliminar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            const totalH = document.getElementById('totalHours');
+            const totalNightH = document.getElementById('totalNightHours');
+
+            if (totalH) totalH.innerText = formatMinutes(totalAcc);
+            if (totalNightH) totalNightH.innerText = formatMinutes(nightAcc);
+        }
+
+        function alertCustom(msg, type = "error") {
+            const div = document.createElement('div');
+            const bgClass = type === "success" ? "bg-green-600" : "bg-red-600";
+            div.className = `fixed bottom-4 right-4 ${bgClass} text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce`;
+            div.innerText = msg;
+            document.body.appendChild(div);
+            setTimeout(() => {
+                div.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>
