@@ -101,12 +101,27 @@ function deleteEntry(id) {
     renderEntries();
 }
 
-function clearAll() {
-    if (confirm("¿Estás seguro de que quieres borrar todo el historial?")) {
-        entries = [];
-        saveData();
-        renderEntries();
-    }
+// Funciones del Modal de Confirmación
+function openConfirmModal() {
+    document.getElementById('confirmModal').classList.remove('hidden');
+}
+
+function closeConfirmModal() {
+    document.getElementById('confirmModal').classList.add('hidden');
+}
+
+function executeClearAll() {
+    entries = [];
+    try {
+        localStorage.removeItem('work_time_entries');
+        localStorage.removeItem('work_user_name');
+    } catch (e) { }
+
+    document.getElementById('userName').value = '';
+    updateDisplayName(false);
+    renderEntries();
+    closeConfirmModal();
+    alertCustom("Historial borrado con éxito.", "success");
 }
 
 function renderEntries() {
