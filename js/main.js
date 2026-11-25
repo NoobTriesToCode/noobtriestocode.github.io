@@ -18,7 +18,7 @@ function seleccionarSubtitulo() {
         "Minimizando demandas desde 2013.",
         "Donde el café es fuerte y las horas son largas.",
         "Fichando con estilo, informando con pasión.",
-        "El único lugar donde el tiempo es relativo... a la hora de fichar.",
+        "El único lugar donde el tiempo es relativo... a la hora de fichar."
     ]
 
     document.getElementById('subtitulo').innerText = subtitulos[Math.floor(Math.random() * subtitulos.length)];

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jornada en Weazel News</title>
+    <link rel="stylesheet" type="text/css" href="css/base-fichaje.css">
+    <link rel="icon" type="image/png" href="Icono Weazel.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="text/javascript" src="js/main-fichaje.js"></script>
+
+    <script type="model">
+        var fs = require('fs');
+        fs.writeFile(" thing.json", dictstring, function (err, result) { if (err) console.log('error', err); });
+        </script>
+
+</head>
+
+<body class="p-4 md:p-8">
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-stone-800 text-shadow-lg">Weazel
+                <span class="text-3xl font-bold text-red-50 bg-red-600" style="padding: 0 5px">News</span>
+                ☰
+            </h1>
+            <p class="text-gray-600" id="subtitulo"></p>
+            <!-- <p class="text-gray-600">Reportando en vivo desde la máquina de café.</p> -->
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Formulario de Entrada -->
+            <div class="md:col-span-1 ">
+                <div class="card p-6 border-l-4 border-red-500">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Nuevo Registro</h2>
+                    <div class="space-y-4">
+                        <!-- Campo de Nombre -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nombre del Usuario</label>
+                            <input type="text" id="userName" placeholder="Escribe tu nombre..."
+                                oninput="updateDisplayName()"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Hora de Entrada</label>
+                            <div class="flex gap-2 mt-1">
+                                <input type="time" id="startTime"
+                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                                <button onclick="setCurrentTime('startTime')" title="Usar hora actual"
+                                    class="bg-gray-000 hover:bg-red-500 border border-gray-300 rounded-md px-3 py-1 transition-colors">
+                                    🕒
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Hora de Salida</label>
+                            <div class="flex gap-2 mt-1">
+                                <input type="time" id="endTime"
+                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                                <button onclick="setCurrentTime('endTime')" title="Usar hora actual"
+                                    class="bg-gray-000 hover:bg-red-500 border border-gray-300 rounded-md px-3 py-2 transition-colors">
+                                    🕒
+                                </button>
+                            </div>
+                        </div>
+                        <button onclick="addTimeEntry()"
+                            class="w-full bg-neutral-950 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-500 transition duration-200">
+                            Añadir Registro
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Resumen Total Lateral -->
+                <div class="card p-6 mt-6 bg-white-50 border-l-4 border-red-500">
+                    <div class="mb-4">
+                        <span class="text-xs font-bold text-red-400 uppercase tracking-wider">Empleado</span>
+                        <h2 id="displayName" class="text-xl font-bold text-gray-800 truncate">Usuario</h2>
+                    </div>
+                    <h2 class="text-lg font-bold text-gray-800 mb-2 border-t pt-2 border-blue-100">Totales Acumulados
+                    </h2>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total Horas:</span>
+                            <span id="totalHours" class="font-mono font-bold text-blue-700">0h 0m</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Horas Primas:</span>
+                            <span id="totalNightHours" class="font-mono font-bold text-indigo-700">0h 0m</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-blue-100 flex flex-col gap-2">
+                        <span class="text-xs font-bold text-gray-500 uppercase tracking-wider block">Copia de Seguridad
+                            Local</span>
+                        <div class="flex gap-2">
+                            <button onclick="exportData()"
+                                class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold py-2 px-3 rounded-lg border border-gray-300 transition duration-200 text-center flex items-center justify-center gap-1">
+                                📥 Exportar
+                            </button>
+                            <button onclick="importData()"
+                                class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold py-2 px-3 rounded-lg border border-gray-300 transition duration-200 text-center flex items-center justify-center gap-1">
+                                📤 Importar
+                            </button>
+                            <input type="file" id="importFile" accept=".json" class="hidden"
+                                onchange="importData(event)">
+                        </div>
+                    </div>
+
+                    <button onclick="openConfirmModal()" class="mt-4 text-xs text-red-500 hover:underline">Borrar todo
+                        el historial</button>
+                </div>
+            </div>
+
+            <!-- Modal de confirmación personalizado (sin usar confirm() nativo) -->
+            <div id="confirmModal"
+                class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-200">
+                <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 animate-scale">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">¿Estás seguro?</h3>
+                    <p class="text-gray-500 text-sm mb-6">Esta acción borrará de forma permanente todo el historial
+                        guardado en
+                        tu navegador y cookies.</p>
+                    <div class="flex justify-end gap-3">
+                        <button onclick="closeConfirmModal()"
+                            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition">Cancelar</button>
+                        <button onclick="executeClearAll()"
+                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition">Borrar
+                            todo</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listado de Registros e Informe -->
+            <div class="md:col-span-2 space-y-6">
+                <!-- Nueva Card: Informe de Registro Reciente -->
+                <div id="recentReportCard" class="card p-6 border-t-4 border-red-500 hidden">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                        <span class="mr-2">📝</span> Informe de Registro Reciente
+                    </h2>
+                    <div class="text-sm">
+
+                        <p class="text-gray-500 font-medium" id="reportResume">
+                            Nombre de empleado:
+                            <span id="reportName" class="text-lg font-bold text-gray-800">-</span>
+                            <br>
+
+                            Hora de Entrada:
+                            <span id="reportStart" class="text-lg font-bold text-gray-800">-</span>
+                            <br>
+
+                            Hora de Salida:
+                            <span id="reportEnd" class="text-lg font-bold text-gray-800">-</span>
+                            <br>
+
+                            Hora total:
+                            <span id="reportSingleTotal" class="text-lg font-bold text-green-600">-</span>
+                            <br>
+
+                            Horas totales acumuladas:
+                            <span id="reportAccTotal" class="text-lg font-bold text-blue-700">-</span>
+                            <br>
+
+                            Horas totales acumuladas de 18:00 a 6:00:
+                            <span id="reportAccNight" class="text-xl font-bold text-indigo-700">-</span>
+                        </p>
+
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button onclick="copyPortfolio()"
+                            class="bg-indigo-700 text-white font-bold py-2 px-4 mt-5 rounded-lg hover:bg-red-700 transition duration-200 btnCopyPortfolio">
+                            <span>📋</span> Copiar Informe
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Historial de Registros -->
+                <div class="card p-6 overflow-hidden border-b-4 border-red-500">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Historial de Registros</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entrada
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Salida
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duración
+                                    </th>
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase text-indigo-600">
+                                        Primas</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acción
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Dinámico -->
+                            </tbody>
+                        </table>
+                        <div id="emptyState" class="text-center py-8 text-gray-400 hidden">
+                            No hay registros guardados.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
