@@ -4,204 +4,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>El archivo de Weazel News</title>
-    <link rel="stylesheet" type="text/css" href="css/base.css">
-    <link rel="icon" type="image/png" href="Icono Weazel.png">
+    <title>Weazel News - Historias del pasado</title>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts para estética de periódico clásico y moderno -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=UnifrakturMaguntia&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" type="text/css" href="css/base.css">
     <script type="text/javascript" src="js/main.js"></script>
 
-    <script type="model">
-        var fs = require('fs');
-        fs.writeFile(" thing.json", dictstring, function (err, result) { if (err) console.log('error', err); });
-        </script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        newsprint: '#f4efe6',
+                        newsprintDark: '#e6dfd3',
+                        ink: '#1a1917',
+                        weazelRed: '#b91c1c',
+                        weazelDarkRed: '#7f1d1d',
+                    },
+                    fontFamily: {
+                        masthead: ['"Cinzel"', 'serif'],
+                        gothic: ['"UnifrakturMaguntia"', 'serif'],
+                        headline: ['"Playfair Display"', 'serif'],
+                        body: ['"Lora"', 'serif'],
+                        ui: ['"Inter"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
 
 </head>
 
-<body class="p-4 md:p-8">
-    <div class="max-w-4xl mx-auto">
-        <header class="mb-8 text-center">
-            <h1 class="text-3xl font-bold text-stone-800 text-shadow-lg">Weazel
-                <span class="text-3xl font-bold text-red-50 bg-red-600" style="padding: 0 5px">News</span>
-                ☰
-            </h1>
-            <p class="text-gray-600" id="subtitulo"></p>
-            <!-- <p class="text-gray-600">Reportando en vivo desde la máquina de café.</p> -->
-        </header>
+<?php
+    $enlace_archivo = "https://github.com/NoobTriesToCode/archivo-weazel-news";
+?>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Formulario de Entrada -->
-            <div class="md:col-span-1 ">
-                <div class="card p-6 border-l-4 border-red-500">
-                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Nuevo Registro</h2>
-                    <div class="space-y-4">
-                        <!-- Campo de Nombre -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Nombre del Usuario</label>
-                            <input type="text" id="userName" placeholder="Escribe tu nombre..."
-                                oninput="updateDisplayName()"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Hora de Entrada</label>
-                            <div class="flex gap-2 mt-1">
-                                <input type="time" id="startTime"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
-                                <button onclick="setCurrentTime('startTime')" title="Usar hora actual"
-                                    class="bg-gray-000 hover:bg-red-500 border border-gray-300 rounded-md px-3 py-1 transition-colors">
-                                    🕒
-                                </button>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Hora de Salida</label>
-                            <div class="flex gap-2 mt-1">
-                                <input type="time" id="endTime"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
-                                <button onclick="setCurrentTime('endTime')" title="Usar hora actual"
-                                    class="bg-gray-000 hover:bg-red-500 border border-gray-300 rounded-md px-3 py-2 transition-colors">
-                                    🕒
-                                </button>
-                            </div>
-                        </div>
-                        <button onclick="addTimeEntry()"
-                            class="w-full bg-neutral-950 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-500 transition duration-200">
-                            Añadir Registro
-                        </button>
-                    </div>
-                </div>
+<body class="min-h-screen flex flex-col font-body antialiased selection:bg-weazelRed selection:text-white">
 
-                <!-- Resumen Total Lateral -->
-                <div class="card p-6 mt-6 bg-white-50 border-l-4 border-red-500">
-                    <div class="mb-4">
-                        <span class="text-xs font-bold text-red-400 uppercase tracking-wider">Empleado</span>
-                        <h2 id="displayName" class="text-xl font-bold text-gray-800 truncate">Usuario</h2>
-                    </div>
-                    <h2 class="text-lg font-bold text-gray-800 mb-2 border-t pt-2 border-blue-100">Totales Acumulados
-                    </h2>
-                    <div class="space-y-2">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Total Horas:</span>
-                            <span id="totalHours" class="font-mono font-bold text-blue-700">0h 0m</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Horas Primas:</span>
-                            <span id="totalNightHours" class="font-mono font-bold text-indigo-700">0h 0m</span>
-                        </div>
-                    </div>
+    <!-- BARRA SUPERIOR DE EDICIÓN / CONTROLES -->
+    <div class="bg-ink text-newsprint text-xs font-ui py-2 px-4 border-b-2 border-weazelRed">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center space-x-3">
+                <span class="bg-weazelRed text-white font-bold px-2 py-0.5 uppercase tracking-wider text-[10px]">Los
+                    Santos, SA</span>
+                <span id="current-date-display" class="text-stone-300">Edición Digital de Archivo</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="<?php echo $enlace_archivo ?>" target="_blank" rel="noopener noreferrer" id="main-github-link"
+                    class="hover:text-weazelRed transition-colors flex items-center gap-1.5 font-semibold">
+                    <i class="fa-brands fa-github text-sm"></i>
+                    <span>Repositorio Completo (GitHub)</span>
+                </a>
+            </div>
+        </div>
+    </div>
 
-                    <div class="mt-4 pt-4 border-t border-blue-100 flex flex-col gap-2">
-                        <span class="text-xs font-bold text-gray-500 uppercase tracking-wider block">Copia de Seguridad
-                            Local</span>
-                        <div class="flex gap-2">
-                            <button onclick="exportData()"
-                                class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold py-2 px-3 rounded-lg border border-gray-300 transition duration-200 text-center flex items-center justify-center gap-1">
-                                📥 Exportar
-                            </button>
-                            <button onclick="importData()"
-                                class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold py-2 px-3 rounded-lg border border-gray-300 transition duration-200 text-center flex items-center justify-center gap-1">
-                                📤 Importar
-                            </button>
-                            <input type="file" id="importFile" accept=".json" class="hidden"
-                                onchange="importData(event)">
-                        </div>
-                    </div>
+    <!-- CABECERA PRINCIPAL DE PERIÓDICO (MASTHEAD) -->
+    <header class="max-w-7xl w-full mx-auto px-4 pt-6 pb-4">
+        <div class="grid grid-cols-1 md:grid-cols-12 items-center gap-4 pb-4">
 
-                    <button onclick="openConfirmModal()" class="mt-4 text-xs text-red-500 hover:underline">Borrar todo
-                        el historial</button>
-                </div>
+            <!-- Caja izquierda: Lema / Info -->
+            <div
+                class="hidden md:flex md:col-span-3 border-2 border-ink p-2.5 text-center flex-col justify-center bg-newsprintDark/50">
+                <p class="font-headline font-bold text-xs uppercase tracking-widest text-weazelRed">¡INFORMACIÓN SIN
+                    RUIDO!</p>
+                <p class="text-[11px] mt-1 leading-tight italic" id="subtitulo"></p>
             </div>
 
-            <!-- Modal de confirmación personalizado (sin usar confirm() nativo) -->
-            <div id="confirmModal"
-                class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-200">
-                <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 animate-scale">
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">¿Estás seguro?</h3>
-                    <p class="text-gray-500 text-sm mb-6">Esta acción borrará de forma permanente todo el historial
-                        guardado en
-                        tu navegador y cookies.</p>
-                    <div class="flex justify-end gap-3">
-                        <button onclick="closeConfirmModal()"
-                            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition">Cancelar</button>
-                        <button onclick="executeClearAll()"
-                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition">Borrar
-                            todo</button>
-                    </div>
+            <!-- Centro: Título Weazel News -->
+            <div class="md:col-span-6 text-center">
+                <div class="inline-flex items-center justify-center gap-2 mb-1">
+                    <span class="h-0.5 w-8 bg-weazelRed"></span>
+                    <span class="font-ui text-[10px] font-bold uppercase tracking-[0.25em] text-weazelRed">WEAZEL NEWS
+                        GENESIS</span>
+                    <span class="h-0.5 w-8 bg-weazelRed"></span>
                 </div>
+                <h1
+                    class="font-masthead font-black text-4xl sm:text-6xl lg:text-7xl tracking-tight text-ink uppercase leading-none">
+                    WEAZEL <span class="text-weazelRed">NEWS</span>
+                </h1>
+                <p class="font-headline italic text-sm sm:text-base text-stone-700 mt-1">
+                    Hemeroteca Oficial &bull; Edición de Coleccionista
+                </p>
             </div>
 
-            <!-- Listado de Registros e Informe -->
-            <div class="md:col-span-2 space-y-6">
-                <!-- Nueva Card: Informe de Registro Reciente -->
-                <div id="recentReportCard" class="card p-6 border-t-4 border-red-500 hidden">
-                    <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
-                        <span class="mr-2">📝</span> Informe de Registro Reciente
-                    </h2>
-                    <div class="text-sm">
+            <!-- Caja derecha: Precio / Edición -->
+            <div
+                class="hidden md:flex md:col-span-3 border-2 border-ink p-2.5 text-center flex-col justify-center bg-newsprintDark/50">
+                <p class="font-ui font-bold text-xs uppercase tracking-wider">Precio en Quiosco: <span
+                        class="line-through text-stone-500">$200</span> <span class="text-weazelRed">GRATIS</span></p>
+                <p class="text-[11px] mt-1 leading-tight">Ejemplares completos disponibles en nuestro almacén digital de
+                    GitHub.</p>
+            </div>
+        </div>
 
-                        <p class="text-gray-500 font-medium" id="reportResume">
-                            Nombre de empleado:
-                            <span id="reportName" class="text-lg font-bold text-gray-800">-</span>
-                            <br>
+        <!-- Línea divisoria doble con barra de herramientas -->
+        <div class="newspaper-double-border my-2">
+            <div class="bg-newsprintDark/70 py-2.5 px-3 flex flex-col lg:flex-row justify-between items-center gap-3">
 
-                            Hora de Entrada:
-                            <span id="reportStart" class="text-lg font-bold text-gray-800">-</span>
-                            <br>
+                <!-- Buscador y Filtros -->
+                <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                    <div class="relative flex-grow sm:flex-grow-0 sm:w-64">
+                        <i
+                            class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-stone-500 text-xs"></i>
+                        <input type="text" id="search-input" placeholder="Buscar titular, edición o fecha..."
+                            class="w-full pl-8 pr-3 py-1.5 bg-newsprint border border-ink text-xs font-ui focus:outline-none focus:ring-1 focus:ring-weazelRed placeholder-stone-500">
+                    </div>
 
-                            Hora de Salida:
-                            <span id="reportEnd" class="text-lg font-bold text-gray-800">-</span>
-                            <br>
+                    <select id="category-filter"
+                        class="py-1.5 px-3 bg-newsprint border border-ink text-xs font-ui font-semibold focus:outline-none cursor-pointer">
+                        <option value="ALL">Todas las Secciones</option>
+                        <option value="Periódico">Periódico</option>
+                        <option value="Revista">Revista</option>
+                        <option value="Especial">Especial</option>
+                    </select>
+                </div>
 
-                            Hora total:
-                            <span id="reportSingleTotal" class="text-lg font-bold text-green-600">-</span>
-                            <br>
+                <!-- Botones de Acción (Randomizar Anuncios / Info) -->
+                <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2 w-full lg:w-auto">
+                    <button id="toggle-ads-btn"
+                        class="px-3 py-1.5 border border-ink bg-newsprint hover:bg-ink hover:text-newsprint text-xs font-ui font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
+                        title="Mostrar u ocultar anuncios cómicos">
+                        <i class="fa-solid fa-eye-slash" id="toggle-ads-icon"></i>
+                        <span id="toggle-ads-text">Ocultar Anuncios</span>
+                    </button>
 
-                            Horas totales acumuladas:
-                            <span id="reportAccTotal" class="text-lg font-bold text-blue-700">-</span>
-                            <br>
+                    <button id="randomize-ads-btn"
+                        class="px-3 py-1.5 bg-weazelRed hover:bg-weazelDarkRed text-white border border-ink text-xs font-ui font-bold uppercase tracking-wider transition-colors flex items-center gap-1.5 shadow-[2px_2px_0px_#1a1917] active:translate-y-0.5 cursor-pointer">
+                        <i class="fa-solid fa-shuffle"></i>
+                        <span>Mezclar Anuncios</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
 
-                            Horas totales acumuladas de 18:00 a 6:00:
-                            <span id="reportAccNight" class="text-xl font-bold text-indigo-700">-</span>
+    <!-- CONTENIDO PRINCIPAL: CUADRÍCULA DE PERIÓDICO -->
+    <main class="max-w-7xl w-full mx-auto px-4 py-4 flex-grow">
+
+        <!-- Indicador de estado / Paginación superior -->
+        <div class="flex flex-wrap justify-between items-center mb-6 pb-2 border-b border-ink/30 text-xs font-ui">
+            <div id="results-counter" class="font-semibold text-stone-700">
+                Mostrando ediciones del archivo...
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-stone-600">Elementos por página:</span>
+                <select id="items-per-page" class="bg-newsprint border border-ink px-2 py-0.5 font-bold cursor-pointer">
+                    <option value="6" selected>6 (Equilibrado)</option>
+                    <option value="9">9 (Compacto)</option>
+                    <option value="12">12 (Extenso)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Grid donde se renderizan las Portadas mezcladas con Anuncios Falsos -->
+        <div id="newspaper-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Generado dinámicamente por JS -->
+        </div>
+
+        <!-- Mensaje si no hay resultados -->
+        <div id="empty-state"
+            class="hidden text-center py-16 border-2 border-dashed border-ink/40 my-6 bg-newsprintDark/30">
+            <i class="fa-regular fa-newspaper text-4xl text-stone-500 mb-3"></i>
+            <h3 class="font-headline font-bold text-xl">No se encontraron ediciones en la rotativa</h3>
+            <p class="text-sm text-stone-600 mt-1">Prueba a cambiar los términos de búsqueda o limpia los filtros.</p>
+            <button id="reset-filters-btn"
+                class="mt-4 px-4 py-2 bg-ink text-newsprint font-ui text-xs font-bold uppercase tracking-wider hover:bg-weazelRed transition-colors">
+                Restaurar Archivo
+            </button>
+        </div>
+
+        <!-- CONTROLES DE PAGINACIÓN (Para mantener la web corta y ordenada) -->
+        <nav aria-label="Paginación de ediciones" class="mt-12 mb-6 pt-4 newspaper-double-border-bottom">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 py-2">
+                <button id="prev-page-btn"
+                    class="w-full sm:w-auto px-4 py-2 border-2 border-ink bg-newsprint hover:bg-ink hover:text-newsprint disabled:opacity-40 disabled:pointer-events-none font-ui text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Ediciones Más Recientes</span>
+                </button>
+
+                <div id="page-numbers"
+                    class="flex flex-wrap justify-center items-center gap-1.5 font-ui text-xs font-bold">
+                    <!-- Números de página generados dinámicamente -->
+                </div>
+
+                <button id="next-page-btn"
+                    class="w-full sm:w-auto px-4 py-2 border-2 border-ink bg-newsprint hover:bg-ink hover:text-newsprint disabled:opacity-40 disabled:pointer-events-none font-ui text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                    <span>Ediciones Anteriores</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </nav>
+
+    </main>
+
+    <!-- PIE DE PÁGINA -->
+    <footer class="bg-ink text-newsprint border-t-4 border-weazelRed mt-auto py-8 px-4">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left items-center">
+            <div>
+                <h2 class="font-masthead font-bold text-2xl tracking-wider">WEAZEL <span
+                        class="text-weazelRed">NEWS</span></h2>
+                <p class="text-xs text-stone-400 mt-1 font-ui">Información sin ruidos.
+                </p>
+            </div>
+            <div class="text-center">
+                <p class="text-xs text-stone-300 italic">"Si no salió en Weazel News, probablemente fue encubierto por
+                    el FIB."</p>
+                <p class="text-[11px] text-stone-500 mt-1 font-ui">Genesis Community &bull; Weazel News &bull; Todos los
+                    derechos
+                    reservados.</p>
+            </div>
+            <div class="md:text-right font-ui">
+                <a href="<?php echo $enlace_archivo ?>" target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-weazelRed hover:bg-red-700 text-white text-xs font-bold uppercase tracking-wider transition-colors">
+                    <i class="fa-brands fa-github text-base"></i>
+                    <span>Ver Periódicos Completos en GitHub</span>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL DE VISTA PREVIA DE PORTADA -->
+    <div id="cover-modal"
+        class="fixed inset-0 z-50 hidden bg-ink/85 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+        <div
+            class="bg-newsprint border-4 border-ink max-w-4xl w-full shadow-2xl overflow-hidden my-auto relative animate-fade-in">
+
+            <!-- Barra superior del modal -->
+            <div class="bg-ink text-newsprint px-4 py-3 flex justify-between items-center border-b-2 border-weazelRed">
+                <div class="flex items-center gap-2 font-ui text-xs font-bold uppercase tracking-wider">
+                    <span class="bg-weazelRed px-2 py-0.5 text-white" id="modal-edition-badge">EDICIÓN #</span>
+                    <span id="modal-date" class="text-stone-300">Fecha</span>
+                </div>
+                <button id="close-modal-btn"
+                    class="text-stone-300 hover:text-white text-xl leading-none px-2 cursor-pointer"
+                    aria-label="Cerrar vista previa">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Cuerpo del modal -->
+            <div class="grid grid-cols-1 md:grid-cols-12">
+                <!-- Imagen de la portada en grande -->
+                <div
+                    class="md:col-span-7 bg-stone-900 flex items-center justify-center p-4 border-b-2 md:border-b-0 md:border-r-2 border-ink">
+                    <img id="modal-image" src="" alt="Portada del periódico"
+                        class="max-h-[70vh] w-auto object-contain border border-stone-600 shadow-lg">
+                </div>
+
+                <!-- Detalles y Enlace a GitHub -->
+                <div class="md:col-span-5 p-6 flex flex-col justify-between bg-newsprint">
+                    <div>
+                        <span id="modal-category"
+                            class="inline-block font-ui text-[10px] font-bold uppercase tracking-widest text-weazelRed border border-weazelRed px-2 py-0.5 mb-2">
+                            SECCIÓN
+                        </span>
+                        <h3 id="modal-title" class="font-headline font-black text-2xl leading-tight text-ink mb-3">
+                            Titular de la edición
+                        </h3>
+                        <div class="h-0.5 w-12 bg-ink mb-4"></div>
+                        <p id="modal-summary" class="text-sm text-stone-800 leading-relaxed mb-2">
+                            Resumen de los acontecimientos cubiertos en esta edición especial de Weazel News.
                         </p>
+                        <p
+                            style="height:2px;text-align:left;margin-left:0; margin-bottom: 10px; background-color:#000000;">
 
+                        </p>
+                        <p id="modal-index" class="text-sm text-stone-800 leading-relaxed mb-6">
+                            Índice de contenidos de la edición:
+                        </p>
                     </div>
 
-                    <div class="flex justify-end">
-                        <button onclick="copyPortfolio()"
-                            class="bg-indigo-700 text-white font-bold py-2 px-4 mt-5 rounded-lg hover:bg-red-700 transition duration-200 btnCopyPortfolio">
-                            <span>📋</span> Copiar Informe
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Historial de Registros -->
-                <div class="card p-6 overflow-hidden border-b-4 border-red-500">
-                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Historial de Registros</h2>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha
-                                    </th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entrada
-                                    </th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Salida
-                                    </th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duración
-                                    </th>
-                                    <th
-                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase text-indigo-600">
-                                        Primas</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acción
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody id="historyBody" class="bg-white divide-y divide-gray-200">
-                                <!-- Dinámico -->
-                            </tbody>
-                        </table>
-                        <div id="emptyState" class="text-center py-8 text-gray-400 hidden">
-                            No hay registros guardados.
+                    <div class="space-y-3 pt-4 border-t border-ink/20 font-ui">
+                        <div class="bg-newsprintDark p-3 border border-ink/30 text-xs text-stone-700">
+                            <i class="fa-solid fa-circle-info text-weazelRed mr-1"></i>
+                            Para ahorrar espacio en la web, solo mostramos la portada. Puedes leer o descargar el
+                            <strong>periódico completo</strong> desde nuestro archivo en GitHub:
                         </div>
+
+                        <a id="modal-github-btn" href="#" target="_blank" rel="noopener noreferrer"
+                            class="w-full py-3 px-4 bg-ink hover:bg-weazelRed text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 shadow-[3px_3px_0px_#b91c1c]">
+                            <i class="fa-brands fa-github text-base"></i>
+                            <span>Leer Periódico Completo en GitHub</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
                     </div>
                 </div>
             </div>

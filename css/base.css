@@ -1,10 +1,58 @@
+/* Textura sutil de papel periódico */
 body {
-    background-color: #f3f4f6;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4efe6;
+    background-image:
+        radial-gradient(rgba(26, 25, 23, 0.04) 1px, transparent 0),
+        radial-gradient(rgba(26, 25, 23, 0.03) 1px, #f4efe6 0);
+    background-size: 24px 24px;
+    background-position: 0 0, 12px 12px;
+    color: #1a1917;
 }
 
-.card {
-    background: white;
-    border-radius: 1rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+/* Estilo de doble línea de periódico */
+.newspaper-double-border {
+    border-top: 4px solid #1a1917;
+    border-bottom: 1px solid #1a1917;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.newspaper-double-border-bottom {
+    border-top: 1px solid #1a1917;
+    border-bottom: 4px solid #1a1917;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+/* Efecto de tinta/papel en anuncios retro */
+.retro-ad {
+    background-color: #ebe4d5;
+    background-image: repeating-linear-gradient(-45deg,
+            rgba(26, 25, 23, 0.02),
+            rgba(26, 25, 23, 0.02) 4px,
+            transparent 4px,
+            transparent 8px);
+}
+
+/* Transición suave para tarjetas */
+.press-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.press-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 6px 6px 0px #1a1917;
+}
+
+/* Scrollbar personalizada estilo tinta */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #e6dfd3;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1a1917;
 }
