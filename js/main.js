@@ -170,16 +170,24 @@ const FAKE_ADS = [
         body: "Compra hoy un lanzacohetes guiado y llévate gratis una gorra patriótica. Sin preguntas, sin esperas, sin sentido común. ¡Segunda Enmienda al máximo!",
         footer: "Válido en todas las tiendas de San Andreas. No apuntar hacia dentro del local.",
         icon: "fa-gun",
+        imageUrl: "https://raw.githubusercontent.com/NoobTriesToCode/archivo-weazel-news/main/Anuncios%20Falsos/Ammu%20nation.png",
+        hideText: false,
         badge: "OFERTA EXPLOSIVA"
     },
     {
-        brand: "SPRUNK",
-        tagline: "La esencia de la vida (y el azúcar)",
-        headline: "¡98% AZÚCAR, 2% COLORANTE VERDE RADIACTIVO!",
-        body: "¿Para qué dormir 8 horas si puedes beber 6 latas de Sprunk y ver sonidos? Recomendado por el 0% de los dentistas de Los Santos.",
-        footer: "Puede causar taquicardia, visión láser y ganas de saltar rampas.",
-        icon: "fa-bolt",
-        badge: "ENERGÍA EXTREMA"
+        imageUrl: "https://raw.githubusercontent.com/NoobTriesToCode/archivo-weazel-news/main/Anuncios%20Falsos/Brain_Implosion_Energy.png",
+        hideText: true, // Ejemplo de anuncio que ya tiene todo el texto en su imagen
+        badge: "BEBIDAS"
+    },
+    {
+        imageUrl: "https://raw.githubusercontent.com/NoobTriesToCode/archivo-weazel-news/main/Anuncios%20Falsos/Almohada%20que%20cuenta%20chistes%20malos.png",
+        hideText: true, // Ejemplo de anuncio que ya tiene todo el texto en su imagen
+        badge: "PARA HOGAR"
+    },
+    {
+        imageUrl: "https://raw.githubusercontent.com/NoobTriesToCode/archivo-weazel-news/main/Anuncios%20Falsos/DragonRoshi.png",
+        hideText: true, // Ejemplo de anuncio que ya tiene todo el texto en su imagen
+        badge: "MODA"
     },
     {
         brand: "PIBWASSER",
@@ -257,25 +265,42 @@ let state = {
  * ============================================================================
  */
 window.onload = () => {
-    seleccionarSubtitulo();
+    selectSubtitle();
 };
 
 // Randomizar subtítulo del periódico
-function seleccionarSubtitulo() {
-    const subtitulos = [
+function selectSubtitle() {
+    const subtitles = [
         "Buscando la verdad (y mis llaves) en directo.",
         "Reportando en vivo desde la máquina de café.",
         "Minimizando demandas desde 2026.",
         "Donde el café es fuerte y las horas son largas.",
-        "Donde los días de amenaza de bomba los llamamos rutina.",
+        "Donde las de amenazas de bomba las llamamos Lunes.",
         "Cubrimos lo que otros medios ignoran.",
         "Siempre un paso adelante de los rumores.",
         "Informando con integridad, incluso cuando nadie mira.",
         "Donde la objetividad es nuestra brújula.",
-        "La verdad no tiene fecha de caducidad."
+        "La verdad no tiene fecha de caducidad.",
+        "La policia no comenta mucho, nosotros lo intentamos.",
+        "Sin hackeos de servidores desde Octubre.",
+        "2 Días desde el último accidente de helicoptero.",
+        "No relacionado con la empresa de detectives A.R.C.A.D.A.",
+        "Da - Dragon Dragunov.",
+        "Se busca más personal femenino - Yolanda Castillo.",
+        "Que no sea nada lo del ojo, y una patá pa'l perro - Francisco Medina.",
+        "Ojalá revientes de salud - Francisco Medina.",
+        "Da - Iosif Romanov.",
+        "La falta de diseño gráfico es evidente - Marc Navarro.",
+        "Troncolega - John Nose",
+        "Compartimos local con el club de la comedia de vez en cuando.",
+        "Prohibido fumar si eres oficinista coreano.",
+        "Ahora con impresora funcional.",
+        "Oyeeee....!!.",
+        "¿Hay alguien por ahí?.",
+        "El Weazel es un campo de nabos.",
     ]
 
-    document.getElementById('subtitulo').innerText = subtitulos[Math.floor(Math.random() * subtitulos.length)];
+    document.getElementById('subtitulo').innerText = subtitles[Math.floor(Math.random() * subtitles.length)];
 }
 
 // Mezclar un array usando algoritmo Fisher-Yates
@@ -401,43 +426,101 @@ function createCoverCardHTML(cover) {
             `;
 }
 
-// Renderizar una tarjeta de Anuncio Falso Cómico
+// Renderizar una tarjeta de Anuncio Falso Cómico (soporta imagen + texto opcional)
 function createAdCardHTML(ad) {
+    const hasImage = ad.imageUrl && ad.imageUrl.trim() !== "";
+    const isImageOnly = hasImage && ad.hideText === true;
+
+    // Caso 1: Anuncio gráfico completo (solo imagen sin textos adicionales)
+    if (isImageOnly) {
+        return `
+                    <aside class="retro-ad border-4 border-double border-ink p-3 flex flex-col justify-between relative select-none shadow-[4px_4px_0px_rgba(26,25,23,0.15)]">
+                        <!-- Cinta superior de "Publicidad" -->
+                        <div class="flex justify-between items-center border-b-2 border-ink pb-1.5 mb-2">
+                            <span class="font-ui text-[9px] font-bold uppercase tracking-[0.2em] text-stone-600">ESPACIO PUBLICITARIO</span>
+                            ${ad.badge ? `<span class="bg-ink text-newsprint font-ui text-[9px] font-bold px-2 py-0.5 uppercase">${ad.badge}</span>` : ''}
+                        </div>
+
+                        <!-- Cartel gráfico ocupando todo el espacio disponible -->
+                        <div class="my-auto overflow-hidden flex-grow flex items-center justify-center">
+                            <img  
+                                src="${ad.imageUrl}" 
+                                alt="${ad.brand || 'Anuncio patrocinado'}" 
+                                loading="lazy"
+                                onerror="this.src='https://placehold.co/600x750/1a1917/f4efe6?text=Anuncio+Patrocinado'"
+                                class="w-full object-cover border-2 border-ink "
+                            >
+                        </div>
+
+                        <!-- Pie mínimo de prensa -->
+                        <div class="pt-1.5 mt-2 border-t border-dashed border-ink/50 text-center">
+                            <p class="font-ui text-[9px] text-stone-500 uppercase tracking-widest">
+                                Publicidad Contratada &bull; Weazel News
+                            </p>
+                        </div>
+                    </aside>
+                `;
+    }
+
+    // Caso 2: Anuncio híbrido (Imagen + Texto) o Clásico (Icono + Texto)
     return `
                 <aside class="retro-ad border-4 border-double border-ink p-5 flex flex-col justify-between relative select-none shadow-[4px_4px_0px_rgba(26,25,23,0.15)]">
                     <!-- Cinta superior de "Publicidad" -->
                     <div class="flex justify-between items-center border-b-2 border-ink pb-2 mb-3">
                         <span class="font-ui text-[9px] font-bold uppercase tracking-[0.2em] text-stone-600">ESPACIO PUBLICITARIO</span>
-                        <span class="bg-ink text-newsprint font-ui text-[9px] font-bold px-2 py-0.5 uppercase">${ad.badge}</span>
+                        ${ad.badge ? `<span class="bg-ink text-newsprint font-ui text-[9px] font-bold px-2 py-0.5 uppercase">${ad.badge}</span>` : ''}
                     </div>
 
                     <!-- Contenido del Anuncio -->
-                    <div class="text-center my-auto py-3">
-                        <div class="w-14 h-14 mx-auto mb-3 border-2 border-ink rounded-full flex items-center justify-center bg-newsprint text-ink text-2xl shadow-[2px_2px_0px_#1a1917]">
-                            <i class="fa-solid ${ad.icon}"></i>
-                        </div>
+                    <div class="text-center my-auto py-2">
+                        ${hasImage ? `
+                            <div class="mb-3 border-2 border-ink overflow-hidden bg-stone-900 shadow-[2px_2px_0px_#1a1917]">
+                                <img 
+                                    src="${ad.imageUrl}" 
+                                    alt="${ad.brand || 'Anuncio'}" 
+                                    loading="lazy"
+                                    onerror="this.parentElement.style.display='none'"
+                                    class="w-full h-40 object-cover"
+                                >
+                            </div>
+                        ` : `
+                            <div class="w-14 h-14 mx-auto mb-3 border-2 border-ink rounded-full flex items-center justify-center bg-newsprint text-ink text-2xl shadow-[2px_2px_0px_#1a1917]">
+                                <i class="fa-solid ${ad.icon || 'fa-bullhorn'}"></i>
+                            </div>
+                        `}
                         
-                        <h3 class="font-masthead font-black text-2xl tracking-wider text-ink uppercase">
-                            ${ad.brand}
-                        </h3>
-                        <p class="font-headline italic text-xs text-weazelRed font-bold mb-3">
-                            "${ad.tagline}"
-                        </p>
+                        ${ad.brand ? `
+                            <h3 class="font-masthead font-black text-2xl tracking-wider text-ink uppercase">
+                                ${ad.brand}
+                            </h3>
+                        ` : ''}
 
-                        <div class="border-y-2 border-ink py-3 my-3 bg-newsprint/60 px-2">
-                            <h4 class="font-ui font-black text-sm uppercase leading-tight text-ink mb-2">
-                                ${ad.headline}
-                            </h4>
-                            <p class="font-body text-xs text-stone-800 leading-relaxed">
-                                ${ad.body}
+                        ${ad.tagline ? `
+                            <p class="font-headline italic text-xs text-weazelRed font-bold mb-3">
+                                "${ad.tagline}"
                             </p>
-                        </div>
+                        ` : ''}
+
+                        ${(ad.headline || ad.body) ? `
+                            <div class="border-y-2 border-ink py-3 my-3 bg-newsprint/60 px-2">
+                                ${ad.headline ? `
+                                    <h4 class="font-ui font-black text-sm uppercase leading-tight text-ink mb-2">
+                                        ${ad.headline}
+                                    </h4>
+                                ` : ''}
+                                ${ad.body ? `
+                                    <p class="font-body text-xs text-stone-800 leading-relaxed">
+                                        ${ad.body}
+                                    </p>
+                                ` : ''}
+                            </div>
+                        ` : ''}
                     </div>
 
                     <!-- Letra pequeña cómica -->
                     <div class="pt-2 border-t border-dashed border-ink/50 text-center">
                         <p class="font-ui text-[10px] text-stone-600 italic leading-tight">
-                            * ${ad.footer}
+                            ${ad.footer ? `* ${ad.footer}` : 'Publicidad Patrocinada'}
                         </p>
                     </div>
                 </aside>
